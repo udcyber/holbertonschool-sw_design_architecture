@@ -212,4 +212,3 @@ GitHub repository: holbertonschool-sw_design_architecture
 Directory: uml_intro  
 File: 1-sequence_diagram.mmd  
   
----
