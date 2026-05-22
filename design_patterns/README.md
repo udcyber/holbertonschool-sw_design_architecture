@@ -1,0 +1,188 @@
+# Introduction to Design Patterns with Python
+
+---
+  
+General Requirements
+- Python 3.10 or later
+- Every submitted file must start with:
+```
+#!/usr/bin/env python3
+```
+- Code must follow PEP 8
+- No external dependencies are required unless explicitly stated
+- Files must run with:
+```
+python3 <filename>
+```
+
+---
+  
+## 0. Factory — Extending a registry
+  
+Design Problem
+  
+In many systems, object creation is spread across several parts of the code. This may start as something simple, but it becomes harder to maintain when new concrete types are added.
+  
+Friendly scenario
+  
+Imagine a mobility platform that supports buses, trains, bikes, and scooters. If different parts of the application create these objects directly, adding a new vehicle type requires modifying several places. A factory centralizes that decision.
+  
+Objective
+  
+Extend an existing factory registry to support a new vehicle type, without modifying the core creation logic inside ```create```.
+  
+Context
+  
+The Factory pattern is a creational pattern. Its role is to centralize object creation so the rest of the code does not need to know which concrete class to instantiate. Instead of scattering ```Bus()```, ```Train()```, and ```Bike()``` calls across the codebase, callers ask the factory for a vehicle by name.
+  
+A naive factory that grows with every new type looks like this:
+```
+def create(self, kind: str):
+    if kind == "bus":
+        return Bus()
+    elif kind == "train":
+        return Train()
+    elif kind == "scooter":    # must edit here every time
+        return Scooter()
+```
+This violates the open/closed principle: the method is never closed for modification. The registry approach solves this — new types are registered from outside, and ```create``` never changes:
+```
+factory.register_kind("scooter", Scooter)
+```
+In the provided starter file, ```VehicleFactory``` already manages ```Bus```, ```Train```, and ```Bike``` via a ```_registry``` dictionary. ```register_kind(name, cls)``` maps a string key to a class; ```create(kind)``` looks up the key and calls the class with no arguments. The ```Scooter``` class is defined but not yet registered.
+  
+Instructions
+  
+Copy the starter code from ```here:```
+1. Read the existing ```VehicleFactory``` and ```main()```.
+2. In ```main()```, call ```factory.register_kind("scooter", Scooter)``` to register the new type.
+3. Add ```print(factory.create("scooter").mode())``` after the existing prints.
+  
+Running the code must print exactly:
+```
+road
+rails
+lane
+scooter_lane
+```
+```VehicleFactory.create``` must not contain a hardcoded ```if kind == "scooter"``` branch — the registry does the mapping. Adding a new vehicle type required zero edits to existing factory logic.
+  
+Repo:
+  
+GitHub repository: holbertonschool-sw_design_architecture  
+Directory: design_patterns  
+File: 0-factory.py  
+  
+---
+
+## 1. Observer - Adding a new subscriber
+  
+Design Problem
+  
+Some systems need to react to events without tightly coupling the event source to every possible reaction.
+  
+Friendly scenario
+  
+Consider a news platform that publishes updates. One subscriber may send emails, another may write logs, and another may send SMS alerts only for urgent news. The publisher should not need to know the internal details of each subscriber.
+  
+Objective
+  
+Implement a new observer and subscribe it to a running notification system, filtering it to receive only specific event 
+topics.
+  
+Context
+  
+The Observer pattern is a behavioral pattern. It defines a one-to-many dependency: when a subject emits an event, all registered observers are notified without the subject knowing their concrete types. This decouples the publisher (who emits) from the listeners (who react), making it easy to add new reactions without touching the publisher.
+  
+A tightly coupled alternative hardcodes every listener in the publisher:
+```
+def publish(self, headline: str) -> None:
+    EmailNotifier().send(headline)
+    LogNotifier().write(headline)
+```
+Adding another reaction in that design would force you to edit the publisher.
+  
+With ```NewsSubject```, the publisher only calls ```self._subject.notify(topic, data)``` (it has no knowledge of ```LogObserver```, ```EmailObserver```, or any future listener). Observers register themselves and declare which topics they care about.
+  
+In the provided starter file, ```NewsSubject``` already implements ```subscribe(observer, topics=None)```, ```unsubscribe(observer)```, and ```notify(topic, data)``` with safe snapshot iteration (to handle observers that unsubscribe during a broadcast). ```LogObserver``` (subscribed to sports and breaking) and ```EmailObserver``` (subscribed to all topics) are already wired. ```SmsObserver``` is missing.
+  
+Instructions
+  
+Copy the starter code from ```here```
+1. Read the existing ```NewsSubject```, ```LogObserver```, and ```EmailObserver```.
+2. Implement ```SmsObserver``` with an ```update(topic, data)``` method that prints ```sms:<topic>=<data>```.
+3. In ```main()```, instantiate ```SmsObserver``` and subscribe it with ```topics={"breaking"}``` only.
+  
+Running the code must print exactly:
+```
+email:weather=rain
+log:sports=goal
+email:sports=goal
+log:breaking=alert
+email:breaking=alert
+sms:breaking=alert
+```
+```SmsObserver``` must react only to ```"breaking"``` — it must not print for ```weather``` or ```sports``` events. Adding it required zero edits to ```NewsSubject``` or any existing observer.
+  
+Repo:
+  
+GitHub repository: holbertonschool-sw_design_architecture  
+Directory: design_patterns  
+File: 1-observer.py  
+  
+---
+
+## 2. Decorator - Adding a new wrapper
+  
+Design Problem
+  
+When a system has several independent optional features, inheritance can create too many subclasses to manage.
+  
+Friendly scenario
+  
+Imagine a coffee shop system. A customer may want milk, sugar, caramel, or any combination of them. Creating one subclass for every possible combination would quickly become impractical. Wrapping an object lets the system add behavior dynamically.
+  
+Objective
+  
+Add a new decorator that extends a ```Beverage``` by wrapping it, composing correctly with existing decorators without modifying any existing class.
+  
+Context
+  
+The Decorator pattern is a structural pattern. It attaches new responsibilities to an object by wrapping it — an alternative to creating a new subclass for each feature combination. With N independent optional features, inheritance would require ```2^N``` subclasses; decorators require only N wrapper classes that compose freely.
+  
+A subclass-based alternative for three toppings would produce:
+```
+CoffeeWithMilk
+CoffeeWithSugar
+CoffeeWithMilkAndSugar
+CoffeeWithCaramel
+CoffeeWithMilkAndCaramel
+...
+```
+Each decorator instead wraps any ```Beverage```, delegates ```cost()``` and ```description()``` to ```self._inner```, and adds its own contribution. Stacking is done in the constructor call: ```MilkDecorator(SugarDecorator(Coffee()))```. The nesting order determines the description order.
+
+In starter code provided, ```Coffee``` is a concrete ```Beverage```. ```MilkDecorator``` (+10¢, ```" + milk"```) and ```SugarDecorator``` (+5¢, ```" + sugar"```) are fully implemented as a model. ```CaramelDecorator``` is missing.
+  
+Instructions
+  
+Copy the starter code from ```here```
+1. Read ```MilkDecorator``` and ```SugarDecorator``` as your model.
+2. Implement ```CaramelDecorator```:
+- ```cost()``` returns ```self._inner.cost() + 15```.
+- ```description()``` returns ```self._inner.description() + " + caramel"```.
+1. In ```main()```, add the line that builds ```CaramelDecorator(MilkDecorator(SugarDecorator(Coffee())))``` and prints its description and cost.
+  
+Running the code must print exactly:
+```
+Coffee + milk 60
+Coffee + sugar + milk 65
+Coffee + sugar + milk + caramel 80
+```
+No existing class is modified, the new behavior lives entirely in ```CaramelDecorator```. Adding a new topping required zero edits to ```Coffee```, ```MilkDecorator```, or ```SugarDecorator```.
+  
+Repo:
+  
+GitHub repository: holbertonschool-sw_design_architecture  
+Directory: design_patterns  
+File: 2-decorator.py  
+    
