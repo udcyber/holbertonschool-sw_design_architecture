@@ -53,7 +53,7 @@ In the provided starter file, ```VehicleFactory``` already manages ```Bus```, ``
   
 Instructions
   
-Copy the starter code from ```here:```
+The starter code can be found in ```factory_starter.py```
 1. Read the existing ```VehicleFactory``` and ```main()```.
 2. In ```main()```, call ```factory.register_kind("scooter", Scooter)``` to register the new type.
 3. Add ```print(factory.create("scooter").mode())``` after the existing prints.
@@ -108,7 +108,7 @@ In the provided starter file, ```NewsSubject``` already implements ```subscribe(
   
 Instructions
   
-Copy the starter code from ```here```
+The starter code can be found in ```observer_starter```
 1. Read the existing ```NewsSubject```, ```LogObserver```, and ```EmailObserver```.
 2. Implement ```SmsObserver``` with an ```update(topic, data)``` method that prints ```sms:<topic>=<data>```.
 3. In ```main()```, instantiate ```SmsObserver``` and subscribe it with ```topics={"breaking"}``` only.
@@ -165,7 +165,7 @@ In starter code provided, ```Coffee``` is a concrete ```Beverage```. ```MilkDeco
   
 Instructions
   
-Copy the starter code from ```here```
+The starter code can be found in ```observer_starter.py```
 1. Read ```MilkDecorator``` and ```SugarDecorator``` as your model.
 2. Implement ```CaramelDecorator```:
 - ```cost()``` returns ```self._inner.cost() + 15```.
