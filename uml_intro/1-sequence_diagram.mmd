@@ -1,0 +1,10 @@
+sequenceDiagram
+    participant User
+    participant Library
+    participant Book
+
+    User->>Library: create_loan(User, Book)
+    Library->>Book: mark_as_unavailable()
+    Library->>Library: create participant Loan
+    Library->>Loan: create_loan()
+    Library-->>User: loan created
